@@ -26,6 +26,10 @@ const handleCommentAdded = () => {
   // Note: For a true prod app, we'd use urql's cacheExchange updates, but refetching is simple and works for this simple UI.
   executeQuery({ requestPolicy: 'network-only' });
 };
+
+const handleLinkDeleted = () => {
+  executeQuery({ requestPolicy: 'network-only' });
+};
 </script>
 
 <template>
@@ -44,6 +48,7 @@ const handleCommentAdded = () => {
         v-for="link in data.feed"
         :key="link.id"
         :link="link"
+        @delete="handleLinkDeleted"
       >
         <template #comments>
           <CommentsView

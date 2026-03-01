@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ref } from 'vue';
+import { useMutation } from '@urql/vue';
 
 const props = defineProps<{
   link: {
@@ -10,10 +11,35 @@ const props = defineProps<{
   }
 }>();
 
+const emit = defineEmits<{
+  (e: 'delete'): void
+}>();
+
+const DELETE_LINK_MUTATION = `
+  mutation DeleteLink($id: ID!) {
+    deleteLink(id: $id) {
+      id
+    }
+  }
+`;
+
+const { executeMutation: deleteLink } = useMutation(DELETE_LINK_MUTATION);
+
 const showComments = ref(false);
 
 const toggleComments = () => {
   showComments.value = !showComments.value;
+};
+
+const handleDelete = async () => {
+  if (confirm('Are you sure you want to delete this link?')) {
+    const result = await deleteLink({ id: props.link.id });
+    if (!result.error) {
+      emit('delete');
+    } else {
+      console.error('Failed to delete user:', result.error);
+    }
+  }
 };
 </script>
 
@@ -27,6 +53,9 @@ const toggleComments = () => {
     <div class="link-actions">
       <button @click="toggleComments" class="btn-secondary">
         {{ showComments ? 'Hide Comments' : `View ${link.comments?.length || 0} Comments` }}
+      </button>
+      <button @click="handleDelete" class="btn-danger ml-auto" style="margin-left: auto;">
+        Delete
       </button>
     </div>
 
@@ -75,6 +104,22 @@ const toggleComments = () => {
 .link-actions {
   display: flex;
   align-items: center;
+}
+
+.btn-danger {
+  background: var(--danger-color, #ef4444);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
 }
 
 .comments-section {
