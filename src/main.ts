@@ -4,7 +4,7 @@ import { schema } from "./schema";
 import { createContext } from "./context";
 
 function main() {
-    const yoga = createYoga({schema, context: createContext});
+    const yoga = createYoga({ schema, context: createContext });
     const server = createServer(yoga);
     server.listen(4000, () => {
         console.log("Server is running on http://localhost:4000");

@@ -7,5 +7,6 @@ export const postLink: NonNullable<MutationResolvers['postLink']> = async (_pare
             description: args.description
         }
     })
+    context.pubSub.publish("newLink", newLink);
     return newLink
 };
