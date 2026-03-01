@@ -3,6 +3,8 @@
 1. Install dependencies
     ```
     npm install
+
+    npx graphql-codegen
     ```
 
 2. Run Prisma migrations
@@ -24,4 +26,3 @@
       ```
       npm run build && npm start
       ```
-# graphQL-practice
