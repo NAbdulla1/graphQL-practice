@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useQuery } from '@urql/vue';
+import { useQuery, useSubscription } from '@urql/vue';
 import LinkItem from './LinkItem.vue';
 import CommentsView from './CommentsView.vue';
 
@@ -30,6 +30,36 @@ const handleCommentAdded = () => {
 const handleLinkDeleted = () => {
   executeQuery({ requestPolicy: 'network-only' });
 };
+
+const NEW_LINK_SUBSCRIPTION = `
+  subscription NewLink {
+    newLink {
+      id
+    }
+  }
+`;
+
+const DELETED_LINK_SUBSCRIPTION = `
+  subscription DeletedLink {
+    deletedLink {
+      id
+    }
+  }
+`;
+
+useSubscription({ query: NEW_LINK_SUBSCRIPTION }, (messages = [], response) => {
+  if (response.newLink) {
+    executeQuery({ requestPolicy: 'network-only' });
+  }
+  return messages;
+});
+
+useSubscription({ query: DELETED_LINK_SUBSCRIPTION }, (messages = [], response) => {
+  if (response.deletedLink) {
+    executeQuery({ requestPolicy: 'network-only' });
+  }
+  return messages;
+});
 </script>
 
 <template>
