@@ -1,0 +1,26 @@
+type Query {
+  info: String!
+  feed(filterNeedle: String): [Link!]!
+  link(id: ID!): Link
+  comment(id: ID!): Comment
+}
+
+type Mutation {
+  postLink(url: String!, description: String!): Link!
+  postCommentOnLink(linkId: ID!, body: String!): Comment!
+}
+
+type Link {
+  id: ID!
+  createdAt: String!
+  description: String!
+  url: String!
+  comments: [Comment!]!
+}
+
+type Comment {
+  id: ID!
+  createdAt: String!
+  body: String!
+  link: Link!
+}
