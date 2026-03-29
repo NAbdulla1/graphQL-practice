@@ -5,8 +5,10 @@ type Query {
   comment(id: ID!): Comment
 }
 
+directive @url on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
+
 type Mutation {
-  postLink(url: String!, description: String!): Link!
+  postLink(url: String! @url, description: String!): Link!
   postCommentOnLink(linkId: ID!, body: String!): Comment!
   deleteLink(id: ID!): Link
 }
