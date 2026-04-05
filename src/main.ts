@@ -1,14 +1,91 @@
+import express from "express";
+import session from "express-session";
+import passport from "passport";
+import cookieParser from "cookie-parser";
+import cors from "cors";
+import dotenv from "dotenv";
 import { createYoga } from "graphql-yoga";
 import { createServer } from "node:http";
 import { schema } from "./schema";
 import { createContext } from "./context";
+import { configurePassport } from "./auth";
+
+dotenv.config();
 
 function main() {
-    const yoga = createYoga({ schema, context: createContext });
-    const server = createServer(yoga);
-    server.listen(4000, () => {
-        console.log("Server is running on http://localhost:4000");
+  const app = express();
+
+  // 1. Configure Passport
+  configurePassport();
+
+  // 2. Middlewares
+  app.use(
+    cors({
+      origin: "http://localhost:5173",
+      credentials: true,
+    })
+  );
+  app.use(cookieParser());
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: true }));
+  app.use(
+    session({
+      secret: process.env.SESSION_SECRET || "keyboard cat",
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        secure: process.env.NODE_ENV === "production",
+        httpOnly: true,
+        maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+      },
+    })
+  );
+  app.use(passport.initialize());
+  app.use(passport.session());
+
+  // 3. GraphQL Yoga
+  const yoga = createYoga({
+    schema,
+    context: createContext,
+    graphqlEndpoint: "/graphql",
+    cors: false, // Let Express handle CORS
+  });
+
+  // 4. Auth Routes
+  app.get("/auth/google", passport.authenticate("google", { scope: ["profile", "email"] }));
+
+  app.get(
+    "/auth/google/callback",
+    passport.authenticate("google", { failureRedirect: "/login-failed" }),
+    (req, res) => {
+      // Explicitly save the session before redirecting to ensure the store is updated
+      req.session.save((err) => {
+        if (err) {
+          console.error("Session save error:", err);
+          return res.redirect("/login-failed");
+        }
+        res.redirect("http://localhost:5173");
+      });
+    }
+  );
+
+  app.post("/auth/logout", (req, res, next) => {
+    req.logout((err) => {
+      if (err) return next(err);
+      res.status(200).json({ message: "Logged out" });
     });
+  });
+
+  // 5. Mount Yoga
+  app.use(yoga.graphqlEndpoint, (req, res) =>
+    yoga.handle(req, res));
+
+  const server = createServer(app);
+  server.listen(4000, () => {
+    console.log("Server is running on http://localhost:4000");
+    console.log("GraphQL Endpoint: http://localhost:4000/graphql");
+    console.log("Google Login: http://localhost:4000/auth/google");
+  });
 }
 
 main();

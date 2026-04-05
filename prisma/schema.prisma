@@ -13,12 +13,22 @@ datasource db {
   url      = "file:./dev.db"
 }
 
+model User {
+  id       Int       @id @default(autoincrement())
+  name     String
+  email    String    @unique
+  links    Link[]
+  comments Comment[]
+}
+
 model Link {
   id          Int       @id @default(autoincrement())
   createdAt   DateTime  @default(now())
   url         String
   description String
   comments    Comment[]
+  postedBy    User?     @relation(fields: [postedById], references: [id])
+  postedById  Int?
 }
 
 model Comment {
@@ -27,4 +37,6 @@ model Comment {
   body      String
   link      Link     @relation(fields: [linkId], references: [id], onDelete: Cascade)
   linkId    Int
+  author    User?    @relation(fields: [authorId], references: [id])
+  authorId  Int?
 }

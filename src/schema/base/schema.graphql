@@ -3,6 +3,7 @@ type Query {
   feed(filterNeedle: String): [Link!]!
   link(id: ID!): Link
   comment(id: ID!): Comment
+  me: User
 }
 
 directive @url on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
@@ -18,12 +19,21 @@ type Subscription {
   deletedLink: Link!
 }
 
+type User {
+  id: ID!
+  email: String!
+  name: String!
+  links: [Link!]!
+  comments: [Comment!]!
+}
+
 type Link {
   id: ID!
   createdAt: String!
   description: String!
   url: String!
   comments: [Comment!]!
+  postedBy: User
 }
 
 type Comment {
@@ -31,4 +41,5 @@ type Comment {
   createdAt: String!
   body: String!
   link: Link!
+  author: User
 }
