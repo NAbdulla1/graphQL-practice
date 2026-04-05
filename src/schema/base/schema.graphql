@@ -9,8 +9,8 @@ type Query {
 directive @url on ARGUMENT_DEFINITION | INPUT_FIELD_DEFINITION
 
 type Mutation {
-  postLink(url: String! @url, description: String! @constraint(minLength: 1, maxLength: 255)): Link!
-  postCommentOnLink(linkId: ID!, body: String! @constraint(minLength: 1, maxLength: 1000)): Comment!
+  postLink(url: String! @url, description: String!): Link!
+  postCommentOnLink(linkId: ID!, body: String!): Comment!
   deleteLink(id: ID!): Link
 }
 
