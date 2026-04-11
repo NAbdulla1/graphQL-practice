@@ -1,16 +1,14 @@
+import { config } from "./config";
 import express from "express";
 import session from "express-session";
 import passport from "passport";
 import cookieParser from "cookie-parser";
 import cors from "cors";
-import dotenv from "dotenv";
 import { createYoga } from "graphql-yoga";
 import { createServer } from "node:http";
 import { schema } from "./schema";
 import { createContext } from "./context";
 import { configurePassport } from "./auth";
-
-dotenv.config();
 
 function main() {
   const app = express();
@@ -30,11 +28,11 @@ function main() {
   app.use(express.urlencoded({ extended: true }));
   app.use(
     session({
-      secret: process.env.SESSION_SECRET || "keyboard cat",
+      secret: config.SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
       cookie: {
-        secure: process.env.NODE_ENV === "production",
+        secure: config.NODE_ENV === "production",
         httpOnly: true,
         maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
       },
@@ -81,10 +79,10 @@ function main() {
     yoga.handle(req, res));
 
   const server = createServer(app);
-  server.listen(4000, () => {
-    console.log("Server is running on http://localhost:4000");
-    console.log("GraphQL Endpoint: http://localhost:4000/graphql");
-    console.log("Google Login: http://localhost:4000/auth/google");
+  server.listen(config.PORT, () => {
+    console.log(`Server is running on http://localhost:${config.PORT}`);
+    console.log(`GraphQL Endpoint: http://localhost:${config.PORT}/graphql`);
+    console.log(`Google Login: http://localhost:${config.PORT}/auth/google`);
   });
 }
 

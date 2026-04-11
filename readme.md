@@ -10,9 +10,9 @@ A GraphQL-based HackerNews clone with Google OAuth 2.0 authentication.
     ```
 
 2. **Configure Environment Variables**
-    Copy `.env-example` to `.env` and fill in your credentials.
+    Copy `.env-example` to `.env.development` and fill in your credentials.
     ```cmd
-    copy .env-example .env
+    copy .env-example .env.development
     ```
 
 3. **Google OAuth 2.0 Setup**
@@ -32,12 +32,24 @@ A GraphQL-based HackerNews clone with Google OAuth 2.0 authentication.
 4. **Database & Types**
     ```cmd
     npx prisma generate
+    npx prisma migrate deploy
     npx graphql-codegen
     ```
 
 5. **Start the server**
     ```cmd
     npm run dev
+    ```
+
+6. **Create migration and apply**
+    ```cmd
+    npx prisma migrate dev --create-only
+    npx prisma migrate deploy
+    ```
+
+    or create and deploy at the same time
+    ```cmd
+    npx prisma migrate dev --name <name-of-migration>
     ```
 
 ---
