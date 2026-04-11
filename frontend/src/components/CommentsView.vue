@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useMutation } from '@urql/vue';
+import { COMMENT_FIELDS } from '../graphql/fragments';
 
 const props = defineProps<{
   linkId: string;
@@ -10,11 +11,10 @@ const props = defineProps<{
 const newCommentBody = ref('');
 
 const POST_COMMENT_MUTATION = `
+  ${COMMENT_FIELDS}
   mutation PostCommentOnLink($linkId: ID!, $body: String!) {
     postCommentOnLink(linkId: $linkId, body: $body) {
-      id
-      body
-      createdAt
+      ...CommentFields
     }
   }
 `;

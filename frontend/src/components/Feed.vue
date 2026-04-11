@@ -2,16 +2,16 @@
 import { useQuery, useSubscription } from '@urql/vue';
 import LinkItem from './LinkItem.vue';
 import CommentsView from './CommentsView.vue';
+import { LINK_FIELDS, COMMENT_FIELDS } from '../graphql/fragments';
 
 const FEED_QUERY = `
+  ${LINK_FIELDS}
+  ${COMMENT_FIELDS}
   query Feed {
     feed {
-      id
-      description
-      url
+      ...LinkFields
       comments {
-        id
-        body
+        ...CommentFields
       }
     }
   }
