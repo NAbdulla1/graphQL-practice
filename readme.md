@@ -10,9 +10,9 @@ A GraphQL-based HackerNews clone with Google OAuth 2.0 authentication.
     ```
 
 2. **Configure Environment Variables**
-    Copy `.env-example` to `.env` and fill in your credentials.
+    Copy `.env-example` to `.env.development` and fill in your credentials.
     ```cmd
-    copy .env-example .env
+    copy .env-example .env.development
     ```
 
 3. **Google OAuth 2.0 Setup**
