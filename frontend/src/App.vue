@@ -71,7 +71,7 @@ const handleMfaVerified = () => {
         <MfaChallenge @verified="handleMfaVerified" />
       </div>
       <div v-else-if="showSettings">
-        <MfaSettings :key="data.me.mfaEnabled" :mfaEnabled="data.me.mfaEnabled" @updated="() => refetchMe({ requestPolicy: 'network-only' })" />
+        <MfaSettings :key="data.me.id" :mfaEnabled="data.me.id ? data.me.mfaEnabled : false" @updated="() => refetchMe({ requestPolicy: 'network-only' })" />
       </div>
       <div v-else>
         <PostLinkForm @linkPosted="handleLinkPosted" />

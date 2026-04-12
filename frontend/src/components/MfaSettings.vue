@@ -20,7 +20,10 @@ const GENERATE_MFA_SECRET = `
 
 const ENABLE_MFA = `
   mutation EnableMfa($code: String!) {
-    enableMfa(code: $code)
+    enableMfa(code: $code) {
+      success
+      recoveryCodes
+    }
   }
 `;
 
@@ -39,6 +42,10 @@ const setupData = ref<{ secret: string; qrCodeDataUrl: string } | null>(null);
 const verificationCode = ref('');
 const error = ref('');
 const loading = ref(false);
+const recoveryCodes = ref<string[]>([]);
+const showRecoveryCodes = ref(false);
+const showDisableInput = ref(false);
+const disableCode = ref('');
 
 const startSetup = async () => {
   loading.value = true;
@@ -58,7 +65,9 @@ const handleEnable = async () => {
   loading.value = true;
   error.value = '';
   const result = await enableMfa({ code: verificationCode.value });
-  if (result.data?.enableMfa) {
+  if (result.data?.enableMfa?.success) {
+    recoveryCodes.value = result.data.enableMfa.recoveryCodes || [];
+    showRecoveryCodes.value = true;
     showSetup.value = false;
     setupData.value = null;
     verificationCode.value = '';
@@ -70,16 +79,17 @@ const handleEnable = async () => {
 };
 
 const handleDisable = async () => {
-  const code = prompt('Please enter your MFA code to disable MFA');
-  if (!code) return;
+  if (!disableCode.value) return;
 
   loading.value = true;
   error.value = '';
-  const result = await disableMfa({ code });
+  const result = await disableMfa({ code: disableCode.value });
   if (result.data?.disableMfa) {
+    showDisableInput.value = false;
+    disableCode.value = '';
     emit('updated');
   } else {
-    alert('Failed to disable MFA. Invalid code.');
+    error.value = 'Failed to disable MFA. Invalid code.';
   }
   loading.value = false;
 };
@@ -107,10 +117,28 @@ const cancelSetup = () => {
     </div>
 
     <div v-else-if="mfaEnabled && !showSetup" class="mfa-status-on">
-      <div class="status-badge on">Enabled</div>
-      <button @click="handleDisable" class="btn-danger-outline" :disabled="loading">
-        Disable MFA
-      </button>
+      <div v-if="!showDisableInput" class="on-controls">
+        <div class="status-badge on">Enabled</div>
+        <button @click="showDisableInput = true" class="btn-danger-outline" :disabled="loading">
+          Disable MFA
+        </button>
+      </div>
+      <div v-else class="disable-input animate-fade-in">
+        <input
+          v-model="disableCode"
+          type="text"
+          placeholder="Enter MFA code to disable"
+          maxlength="6"
+          @keyup.enter="handleDisable"
+        />
+        <div class="disable-actions">
+          <button @click="handleDisable" class="btn-danger" :disabled="loading || disableCode.length !== 6">
+            Confirm Disable
+          </button>
+          <button @click="showDisableInput = false" class="btn-secondary">Cancel</button>
+        </div>
+        <p v-if="error" class="error-text">{{ error }}</p>
+      </div>
     </div>
 
     <div v-if="showSetup" class="mfa-setup animate-fade-in">
@@ -141,6 +169,18 @@ const cancelSetup = () => {
 
       <p v-if="error" class="error-text">{{ error }}</p>
       <button @click="cancelSetup" class="btn-secondary full-width">Cancel</button>
+    </div>
+
+    <!-- Recovery Codes Modal -->
+    <div v-if="showRecoveryCodes" class="recovery-codes-modal animate-fade-in">
+      <div class="modal-content glass-panel">
+        <h4>Save your recovery codes</h4>
+        <p>If you lose your device, you can use these codes to log in to your account. Store them in a safe place.</p>
+        <div class="codes-grid">
+          <code v-for="code in recoveryCodes" :key="code">{{ code }}</code>
+        </div>
+        <button @click="showRecoveryCodes = false" class="btn-primary full-width">I've saved them</button>
+      </div>
     </div>
   </div>
 </template>
@@ -246,6 +286,34 @@ h4 {
   color: white;
 }
 
+.on-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.disable-input {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.disable-actions {
+  display: flex;
+  gap: 0.5rem;
+}
+
+.btn-danger {
+  background: var(--danger-color);
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
 .error-text {
   color: var(--danger-color);
   font-size: 0.9rem;
@@ -254,5 +322,43 @@ h4 {
 
 .full-width {
   width: 100%;
+}
+
+.recovery-codes-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.7);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 2rem;
+}
+
+.recovery-codes-modal .modal-content {
+  max-width: 400px;
+  width: 100%;
+  padding: 2rem;
+  text-align: center;
+}
+
+.codes-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+  text-align: left;
+}
+
+.codes-grid code {
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.5rem;
+  border-radius: 6px;
+  font-family: monospace;
+  font-size: 0.9rem;
+  text-align: center;
 }
 </style>

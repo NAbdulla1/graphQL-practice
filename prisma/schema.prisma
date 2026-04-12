@@ -22,6 +22,7 @@ model User {
   mfaSecret      String?
   mfaEnabled     Boolean   @default(false)
   mfaTempSecret  String?
+  mfaRecoveryCodes String?
 }
 
 model Link {

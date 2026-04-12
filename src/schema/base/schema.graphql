@@ -15,15 +15,25 @@ type Mutation {
 
   # MFA Mutations
   generateMfaSecret: MfaSecretResponse!
-  enableMfa(code: String!): Boolean!
+  enableMfa(code: String!): EnableMfaResponse!
   disableMfa(code: String!): Boolean!
-  verifyMfaLogin(code: String!): Boolean!
+  verifyMfaLogin(code: String!): VerifyMfaLoginResponse!
 }
 
 type MfaSecretResponse {
   secret: String!
   otpauthUrl: String!
   qrCodeDataUrl: String!
+}
+
+type EnableMfaResponse {
+  success: Boolean!
+  recoveryCodes: [String!]
+}
+
+type VerifyMfaLoginResponse {
+  success: Boolean!
+  isRecovery: Boolean!
 }
 
 type Subscription {
