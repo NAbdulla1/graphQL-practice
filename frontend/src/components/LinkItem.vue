@@ -38,6 +38,7 @@ const handleDelete = async () => {
       emit('delete');
     } else {
       console.error('Failed to delete user:', result.error);
+      alert(result.error.message)
     }
   }
 };

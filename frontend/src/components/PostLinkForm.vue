@@ -1,17 +1,17 @@
 <script setup lang="ts">
 import { ref } from 'vue';
 import { useMutation } from '@urql/vue';
+import { LINK_FIELDS } from '../graphql/fragments';
 
 const description = ref('');
 const url = ref('');
 const isFormOpen = ref(false);
 
 const POST_LINK_MUTATION = `
+  ${LINK_FIELDS}
   mutation PostLink($description: String!, $url: String!) {
     postLink(description: $description, url: $url) {
-      id
-      description
-      url
+      ...LinkFields
     }
   }
 `;
