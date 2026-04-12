@@ -208,17 +208,3 @@ input.recovery-input {
   font-style: italic;
 }
 </style>
-
-
-/*
-80bd771b
-384d5138
-46b89470
-9d19d35e
-257b2491
-82c8b449
-979ea47e
-423e3bf8
-346faf2c
-a72958c3
-*/
