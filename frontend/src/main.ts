@@ -5,13 +5,13 @@ import './style.css'
 import App from './App.vue'
 
 const sseClient = createSSEClient({
-  url: 'http://localhost:4000/graphql',
+  url: '/graphql',
 });
 
 const app = createApp(App)
 
 app.use(urql, {
-  url: 'http://localhost:4000/graphql',
+  url: '/graphql',
   fetchOptions: {
     credentials: 'include',
   },

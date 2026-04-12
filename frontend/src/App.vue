@@ -30,7 +30,7 @@ const handleLinkPosted = () => {
 
 const handleLogout = async () => {
   try {
-    await fetch('http://localhost:4000/auth/logout', { method: 'POST', credentials: 'include' });
+    await fetch('/auth/logout', { method: 'POST', credentials: 'include' });
     window.location.reload();
   } catch (err) {
     console.error('Logout failed', err);
@@ -60,7 +60,7 @@ const handleMfaVerified = () => {
         <button @click="handleLogout" class="logout-btn">Logout</button>
       </div>
       <div v-else class="login-prompt">
-        <a href="http://localhost:4000/auth/google" class="login-btn">Login with Google</a>
+        <a href="/auth/google" class="login-btn">Login with Google</a>
       </div>
     </div>
   </header>
@@ -82,7 +82,7 @@ const handleMfaVerified = () => {
       <div class="glass-card">
         <h2>Authentication Required</h2>
         <p>Please log in with Google to view and post to the feed.</p>
-        <a href="http://localhost:4000/auth/google" class="login-btn large">Login with Google</a>
+        <a href="/auth/google" class="login-btn large">Login with Google</a>
       </div>
     </div>
   </main>

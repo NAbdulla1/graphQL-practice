@@ -1,4 +1,5 @@
 import { config } from "./config";
+import path from "path";
 import express from "express";
 import session from "express-session";
 import passport from "passport";
@@ -19,7 +20,7 @@ function main() {
   // 2. Middlewares
   app.use(
     cors({
-      origin: "http://localhost:5173",
+      origin: config.NODE_ENV === "production" ? false : config.FRONTEND_URL,
       credentials: true,
     })
   );
@@ -62,7 +63,7 @@ function main() {
           console.error("Session save error:", err);
           return res.redirect("/login-failed");
         }
-        res.redirect("http://localhost:5173");
+        res.redirect(config.FRONTEND_URL);
       });
     }
   );
@@ -77,6 +78,17 @@ function main() {
   // 5. Mount Yoga
   app.use(yoga.graphqlEndpoint, (req, res) =>
     yoga.handle(req, res));
+
+  // 6. Serve Frontend in Production
+  if (config.NODE_ENV === "production") {
+    const frontendPath = path.resolve(process.cwd(), "dist/frontend");
+    app.use(express.static(frontendPath));
+
+    // Catch-all route for SPA
+    app.get(/.*/, (req, res) => {
+      res.sendFile(path.join(frontendPath, "index.html"));
+    });
+  }
 
   const server = createServer(app);
   server.listen(config.PORT, () => {
