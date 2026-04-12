@@ -3,6 +3,8 @@ import { ref } from 'vue';
 import { useQuery } from '@urql/vue';
 import Feed from './components/Feed.vue';
 import PostLinkForm from './components/PostLinkForm.vue';
+import MfaSettings from './components/MfaSettings.vue';
+import MfaChallenge from './components/MfaChallenge.vue';
 
 const ME_QUERY = `
   query Me {
@@ -10,14 +12,17 @@ const ME_QUERY = `
       id
       name
       email
+      mfaEnabled
+      needsMfaVerification
     }
   }
 `;
 
-const { data, fetching, error } = useQuery({ query: ME_QUERY });
+const { data, fetching, executeQuery: refetchMe } = useQuery({ query: ME_QUERY });
 
 // We assign a key to the feed to force a re-render/refetch when a new link is posted
 const feedKey = ref(0);
+const showSettings = ref(false);
 
 const handleLinkPosted = () => {
   feedKey.value += 1;
@@ -30,6 +35,10 @@ const handleLogout = async () => {
   } catch (err) {
     console.error('Logout failed', err);
   }
+};
+
+const handleMfaVerified = () => {
+  refetchMe({ requestPolicy: 'network-only' });
 };
 </script>
 
@@ -44,7 +53,10 @@ const handleLogout = async () => {
     <div class="auth-bar">
       <div v-if="fetching" class="loading-auth">Checking session...</div>
       <div v-else-if="data?.me" class="user-info">
-        <span>Welcome, <strong>{{ data.me.name }}</strong></span>
+        <span v-if="!data.me.needsMfaVerification">Welcome, <strong>{{ data.me.name }}</strong></span>
+        <button v-if="!data.me.needsMfaVerification" @click="showSettings = !showSettings" class="settings-btn">
+          {{ showSettings ? 'Feed' : 'Settings' }}
+        </button>
         <button @click="handleLogout" class="logout-btn">Logout</button>
       </div>
       <div v-else class="login-prompt">
@@ -55,8 +67,16 @@ const handleLogout = async () => {
 
   <main>
     <div v-if="data?.me">
-      <PostLinkForm @linkPosted="handleLinkPosted" />
-      <Feed :key="feedKey" />
+      <div v-if="data.me.needsMfaVerification">
+        <MfaChallenge @verified="handleMfaVerified" />
+      </div>
+      <div v-else-if="showSettings">
+        <MfaSettings :key="data.me.id" :mfaEnabled="data.me.id ? data.me.mfaEnabled : false" @updated="() => refetchMe({ requestPolicy: 'network-only' })" />
+      </div>
+      <div v-else>
+        <PostLinkForm @linkPosted="handleLinkPosted" />
+        <Feed :key="feedKey" />
+      </div>
     </div>
     <div v-else-if="!fetching" class="auth-required">
       <div class="glass-card">
@@ -93,13 +113,24 @@ const handleLogout = async () => {
   border: 1px solid var(--surface-border);
 }
 
-.logout-btn, .login-btn {
+.logout-btn, .login-btn, .settings-btn {
   padding: 0.4rem 1rem;
   border-radius: 15px;
   cursor: pointer;
   font-size: 0.85rem;
   transition: all 0.2s;
   text-decoration: none;
+}
+
+.settings-btn {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-primary);
+  border: 1px solid var(--surface-border);
+}
+
+.settings-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: var(--text-secondary);
 }
 
 .logout-btn {

@@ -22,6 +22,7 @@
     "@types/node": "22.10.1",
     "@types/passport": "^1.0.17",
     "@types/passport-google-oauth20": "^2.0.17",
+    "@types/qrcode": "^1.5.6",
     "cross-env": "7.0.3",
     "prettier": "3.4.2",
     "tsx": "4.19.2",
@@ -36,9 +37,11 @@
     "express-session": "^1.19.0",
     "graphql": "^16.10.0",
     "graphql-yoga": "5.10.4",
+    "otplib": "^13.4.0",
     "passport": "^0.7.0",
     "passport-google-oauth20": "^2.0.0",
     "prisma": "6.0.1",
+    "qrcode": "^1.5.4",
     "zod": "^4.3.6"
   }
 }
