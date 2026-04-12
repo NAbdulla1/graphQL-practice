@@ -13,4 +13,7 @@ export const User: UserResolvers = {
       .comments();
     return comments ?? [];
   },
+  needsMfaVerification: (parent, _args, context) => {
+    return !!(parent.mfaEnabled && !context.req.session.mfaVerified);
+  },
 };

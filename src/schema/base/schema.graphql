@@ -12,6 +12,18 @@ type Mutation {
   postLink(url: String! @url, description: String!): Link!
   postCommentOnLink(linkId: ID!, body: String!): Comment!
   deleteLink(id: ID!): Link
+
+  # MFA Mutations
+  generateMfaSecret: MfaSecretResponse!
+  enableMfa(code: String!): Boolean!
+  disableMfa(code: String!): Boolean!
+  verifyMfaLogin(code: String!): Boolean!
+}
+
+type MfaSecretResponse {
+  secret: String!
+  otpauthUrl: String!
+  qrCodeDataUrl: String!
 }
 
 type Subscription {
@@ -23,6 +35,8 @@ type User {
   id: ID!
   email: String!
   name: String!
+  mfaEnabled: Boolean!
+  needsMfaVerification: Boolean!
   links: [Link!]!
   comments: [Comment!]!
 }
