@@ -2,6 +2,7 @@ import { PrismaClient, Link, User } from "@prisma/client";
 import { createPubSub, PubSub, YogaInitialContext } from "graphql-yoga";
 import { Request } from "express";
 import "express-session";
+import { redis } from "./redis";
 
 declare module 'express-session' {
   interface SessionData {
@@ -23,6 +24,7 @@ export type GraphQLContext = YogaInitialContext & {
   pubSub: PubSub<PubSubChannels>;
   user: User | null;
   req: GraphQLRequest;
+  redis: typeof redis;
 };
 
 const prisma = new PrismaClient();
@@ -35,5 +37,6 @@ export async function createContext(initialContext: YogaInitialContext & { req: 
     pubSub,
     user: initialContext.req?.user || null,
     req: initialContext.req,
+    redis,
   };
 }

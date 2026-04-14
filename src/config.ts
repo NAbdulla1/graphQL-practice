@@ -22,6 +22,7 @@ const envSchema = z.object({
   GOOGLE_CALLBACK_URL: z.url("GOOGLE_CALLBACK_URL is required. example: http://localhost:4000/auth/google/callback"),
   SESSION_SECRET: z.string().min(1, "SESSION_SECRET is required"),
   FRONTEND_URL: z.url().default("http://localhost:5173"),
+  REDIS_URL: z.url().default("redis://localhost:6379"),
 });
 
 const _env = envSchema.safeParse(process.env);
