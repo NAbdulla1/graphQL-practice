@@ -10,6 +10,8 @@ import { createServer } from "node:http";
 import { schema } from "./schema";
 import { createContext } from "./context";
 import { configurePassport } from "./auth";
+import { RedisStore } from "connect-redis";
+import { redis } from "./redis";
 
 function main() {
   const app = express();
@@ -20,23 +22,31 @@ function main() {
   // 2. Middlewares
   app.use(
     cors({
-      origin: config.NODE_ENV === "production" ? false : config.FRONTEND_URL,
+      origin: config.FRONTEND_URL,
       credentials: true,
     })
+
   );
   app.use(cookieParser());
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
+
+  // 3. Session with Redis Store
   app.use(
     session({
+      store: new RedisStore({
+        client: redis,
+        prefix: "hn:",
+      }),
       secret: config.SESSION_SECRET,
       resave: false,
       saveUninitialized: false,
       cookie: {
-        secure: config.NODE_ENV === "production",
+        secure: config.FRONTEND_URL.startsWith("https"),
         httpOnly: true,
         maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
       },
+
     })
   );
   app.use(passport.initialize());
