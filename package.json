@@ -5,6 +5,7 @@
   "main": "index.js",
   "scripts": {
     "build": "tsc && npm --prefix frontend run build",
+    "build-production": "npm run build && node build-dist.js",
     "dev": "cross-env NODE_ENV=development tsx watch src/main.ts",
     "start-production": "NODE_ENV=production node dist/main.js"
   },

@@ -81,3 +81,60 @@ To build and run the application in production mode:
     npm run start-production
     ```
     The backend will now serve the compiled frontend as static files from `dist/frontend` and handle all SPA routing using a regex-based catch-all route.
+
+---
+
+## IIS Hosting (Windows Server)
+
+To host this application on IIS, follow these steps:
+
+### Prerequisites
+1.  **IISnode**: [Install iisnode for IIS](https://github.com/azure/iisnode).
+2.  **URL Rewrite**: [Install URL Rewrite Module](https://www.iis.net/downloads/microsoft/url-rewrite).
+3.  **Redis**: Ensure Redis is running on localhost (default) or update `REDIS_URL` in `.env.production`.
+
+### Step-by-Step Deployment
+
+1.  **Build the Production Package**
+    ```cmd
+    npm run build-production
+    ```
+    This creates a self-contained `dist` directory with all necessary files (`web.config`, `.env.production`, `prisma/`, etc.).
+
+2.  **Configure IIS**
+    - Open **IIS Manager**.
+    - Right-click **Sites** > **Add Website**.
+    - **Physical path**: Point this to the `dist` directory of your project.
+    - **Port**: Set your desired port (e.g., 80 or 8080).
+
+3.  **Install Production Dependencies**
+    Navigate to the `dist` folder on your server and run:
+    ```cmd
+    npm install --omit=dev
+    ```
+
+4.  **Permissions**
+    The **IIS AppPool** user (e.g., `IIS AppPool\YourSiteName`) must have the correct permissions to run the app and write to the database:
+
+    **For the `dist` folder (Read access):**
+    - Right-click `dist` > **Properties** > **Security** > **Edit**.
+    - Click **Add**, type `IIS AppPool\YourSiteName`, and click **Check Names**.
+    - Ensure **Read & execute**, **List folder contents**, and **Read** are checked.
+    - Click **OK**.
+
+    **For the `dist/prisma` folder (Write access for SQLite):**
+    - Right-click the `prisma` folder inside `dist` > **Properties** > **Security** > **Edit**.
+    - Select the same AppPool user.
+    - Check the **Modify** box (allows SQLite to create/write the `dev.db` file).
+    - Click **OK**.
+
+5.  **Database Migration**
+    If using a fresh database, run prisma migrations from the `dist` folder:
+    ```cmd
+    npx prisma migrate deploy
+    ```
+
+### Troubleshooting
+- **Logs**: Check the `iisnode` folder created inside `dist` for stdout/stderr logs.
+- **Node Path**: If `node.exe` is not in your PATH, update the `nodeProcessCommandLine` in `web.config`.
+- **Named Pipes**: The backend is configured to automatically detect if it's running under IIS and use the provided named pipe instead of a numeric port.

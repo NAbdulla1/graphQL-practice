@@ -90,8 +90,9 @@ function main() {
     yoga.handle(req, res));
 
   // 6. Serve Frontend in Production
-  if (config.NODE_ENV === "production") {
-    const frontendPath = path.resolve(process.cwd(), "dist/frontend");
+  if (config.NODE_ENV === "production" || config.NODE_ENV === "stage") {
+    // In production, we assume the frontend is in a 'frontend' subfolder relative to this file
+    const frontendPath = path.resolve(__dirname, "frontend");
     app.use(express.static(frontendPath));
 
     // Catch-all route for SPA
